@@ -21,7 +21,7 @@ body {
 }
 
 .hidden {
-    display: none !important;
+    /* display: none !important; */
 }
 
 #successMessage {
@@ -180,4 +180,12 @@ i.bi.bi-trash::before {
     align-content: center;
     justify-content: center;
     align-items: center;
+}
+
+
+/* delete advance */
+.accordion-item{
+    border: 1px solid #dee2e6 !important;
+    border-radius: 7px !important;
+    overflow: hidden !important;
 }
