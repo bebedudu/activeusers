@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Git Repo Manager</title>
+    <!-- favicon -->
+    <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Repo Manager" />
+    <link rel="manifest" href="/favicon/site.webmanifest" />
+    <!-- stylesheets -->
+    <link href="index.css" rel="stylesheet">
+    <!-- bootstrap stylesheet -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- bootstrap icon -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+
+<body>
+    <!-- Custom Notification -->
+    <div id="customNotification" class="notification hidden">
+        You logged in successfully!
+    </div>
+
+    <!-- login page -->
+    <div class="container col-xl-10 col-xxl-8 px-4 py-5 loginContainer" id="loginContainer">
+        <div class="row align-items-center g-lg-5 py-5">
+            <div class="col-md-10 mx-auto col-lg-5">
+                <form class="p-4 p-md-5 border rounded-3 bg-body-tertiary" id="loginForm">
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="username" placeholder="username">
+                        <label for="username">Username</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="password" class="form-control" id="password" placeholder="Password">
+                        <label for="password">Password</label>
+                    </div>
+                    <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
+                    <hr class="my-4">
+                    <small class="text-body-secondary">By clicking Sign in, you agree to the terms of use.</small>
+                </form>
+                <p id="message"></p>
+            </div>
+        </div>
+    </div>
+    <!-- sucess notification -->
+    <!-- <div id="successMessage" class="hidden">
+        <h2>You logged in successfully!</h2>
+    </div> -->
+
+    <div class="row w-100 hidden" id="successMessage">
+        <!-- <div class="alert alert-secondary" role="alert">
+            <h2>You logged in successfully!</h2>
+        </div> -->
+        <!-- no. of files in folder -->
+        <div class="filecount">
+            <div class="alert alert-primary alert-dismissible fade show refreshdata" role="alert">
+                <strong>GitHub Folder File Count</strong>
+                <button type="button" class="btn refresh-btn" onclick="fetchFileCounts()"><i
+                        class="bi bi-arrow-clockwise"></i></button>
+            </div>
+            <div id="file-count-grid" class="row">Loading...</div>
+            <!-- <div class="col-sm-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <span class="delete-icon"
+                        onclick="event.stopPropagation(); openDeleteFolder('screenshots')">🗑️</span>
+                    <h5 class="card-title text-center">SCREENSHOTS</h5>
+                    <p class="card-text text-center">772 files</p>
+                </div>
+            </div> -->
+        </div>
+        <!-- token data  -->
+        <div class="tokendata">
+            <div class="alert alert-primary alert-dismissible fade show refreshdata" role="alert">
+                <strong>GitHub Token & Rate Limit</strong>
+                <button type="button" class="btn refresh-btn" onclick="fetchTokens()"><i
+                        class="bi bi-arrow-clockwise"></i></button>
+            </div>
+            <div id="token-grid" class="tokenContainer row">Loading tokens...</div>
+            <!-- <div class="col-sm-6 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title text-center">Dashboard</h5>
+                        <p class="card-text">sdf_dskjfalksjijskdfalejaksfj</p>
+                        <div class="tokendetail">
+                            <strong>Limit: </strong><br>
+                            <strong>Remaining: </strong><br>
+                            <strong>Reset Time: </strong><br>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+        </div>
+        <!-- delete files -->
+        <div class="deletefiles">
+            <div class="alert alert-primary alert-dismissible fade show refreshdata" role="alert">
+                <strong>Delete Files from Selected Folders</strong>
+            </div>
+
+            <!-- Folder Selection -->
+            <div class="form-check folder-input">
+                <div class="input-group mb-3 folder-input">
+                    <div class="input-group-text">
+                        <input class="input-group-text form-check-input mt-0" type="checkbox" value=""
+                            id="cacheCheckbox">
+                        <label class="form-check-label" for="cacheCheckbox"> Cache </label>
+                    </div>
+                    <span id="cacheFileCount" class="input-group-text file-count"></span>
+                    <input type="number" class="form-control" id="cacheCount" min="0"
+                        placeholder="No. of files to delete">
+                    <span class="input-group-text deleteprogress" id="cacheProgress">0/0</span>
+                </div>
+                <div class="input-group mb-3 folder-input">
+                    <div class="input-group-text">
+                        <input class="input-group-text form-check-input mt-0" type="checkbox" value=""
+                            id="configCheckbox">
+                        <label class="form-check-label" for="configCheckbox"> Config </label>
+                    </div>
+                    <span id="configFileCount" class="input-group-text file-count"></span>
+                    <input type="number" class="form-control" id="configCount" min="0"
+                        placeholder="No. of files to delete">
+                    <span class="input-group-text deleteprogress" id="configProgress">0/0</span>
+                </div>
+                <div class="input-group mb-3 folder-input">
+                    <div class="input-group-text">
+                        <input class="input-group-text form-check-input mt-0" type="checkbox" value=""
+                            id="keylogerrorCheckbox">
+                        <label class="form-check-label" for="keylogerrorCheckbox"> Keylogerror </label>
+                    </div>
+                    <span id="keylogerrorFileCount" class="input-group-text file-count"></span>
+                    <input type="number" class="form-control" id="keylogerrorCount" min="0"
+                        placeholder="No. of files to delete">
+                    <span id="keylogerrorProgress" class="input-group-text deleteprogress">0/0</span>
+                </div>
+                <div class="input-group mb-3 folder-input">
+                    <div class="input-group-text">
+                        <input class="input-group-text form-check-input mt-0" type="checkbox" value=""
+                            id="logsCheckbox">
+                        <label class="form-check-label" for="logsCheckbox"> Logs </label>
+                    </div>
+                    <span id="logsFileCount" class="input-group-text file-count"></span>
+                    <input type="number" class="form-control" id="logsCount" min="0"
+                        placeholder="No. of files to delete">
+                    <span id="logsProgress" class="input-group-text deleteprogress">0/0</span>
+                </div>
+                <div class="input-group mb-3 folder-input">
+                    <div class="input-group-text">
+                        <input class="input-group-text form-check-input mt-0" type="checkbox" value=""
+                            id="screenshotsCheckbox">
+                        <label class="form-check-label" for="screenshotsCheckbox"> Screenshots </label>
+                    </div>
+                    <span id="screenshotsFileCount" class="input-group-text file-count"></span>
+                    <input type="number" class="form-control" id="screenshotsCount" min="0"
+                        placeholder="No. of files to delete">
+                    <span id="screenshotsProgress" class="input-group-text deleteprogress">0/0</span>
+                </div>
+            </div>
+            <div class="deletebutton">
+                <button type="button" class="btn btn-outline-danger" onclick="deleteFiles()">Delete Files</button>
+            </div>
+            <div id="result"></div>
+            <!-- Terminal-like log -->
+            <div id="terminal-log"></div>
+        </div>
+        <script src="index.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script> -->
+</body>
+
+</html>
