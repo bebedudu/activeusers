@@ -1,6 +1,19 @@
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+.navbarpage{
+    background-color: #f5f5f5;
+    z-index: 999;
+    width: 97% !important;
+    margin-top: -90px !important;
+    border-radius: 0px 0px 7px 7px ;
+    margin-left: -15px;
+    padding-top: 10px;
+    box-shadow: inset 2px -4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .loginContainer {
@@ -26,7 +39,8 @@ body {
 
 #successMessage {
     background-color: #fff;
-    /* margin: 20px; */
+    margin: 20px;
+    margin-top: 70px !important;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -74,7 +88,7 @@ body {
 
 
 /* file count */
-.filecount, .tokendata, .deletefiles {
+.filecount, .tokendata, .deletefiles, .downloadfiles {
     padding: 10px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
