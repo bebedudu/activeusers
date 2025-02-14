@@ -63,6 +63,8 @@
                 <li class="breadcrumb-item"><a href="#navtokendetalis">Token Details</a></li>
                 <li class="breadcrumb-item"><a href="#navdeletefiles">Delete Files</a></li>
                 <li class="breadcrumb-item"><a href="#navdownloadfiles">Download Files</a></li>
+                <li class="breadcrumb-item"><a href="#navcommithistory">Commit History</a></li>
+                <li class="breadcrumb-item"><a href="https://factiveuser.streamlit.app/" target="_blank">Active User Dashboard</a></li>
             </ol>
         </nav>
         <!-- no. of files in folder -->
@@ -112,69 +114,6 @@
             </div>
 
             <!-- Folder Selection delete-->
-            <!-- <div class="form-check folder-input">
-                <div class="input-group mb-3 folder-input">
-                    <div class="input-group-text">
-                        <input class="input-group-text form-check-input mt-0" type="checkbox" value=""
-                            id="cacheCheckbox">
-                        <label class="form-check-label" for="cacheCheckbox"> Cache </label>
-                    </div>
-                    <span id="cacheFileCount" class="input-group-text file-count"></span>
-                    <input type="number" class="form-control" id="cacheCount" min="0"
-                        placeholder="No. of files to delete">
-                    <span class="input-group-text deleteprogress" id="cacheProgress">0/0</span>
-                </div>
-                <div class="input-group mb-3 folder-input">
-                    <div class="input-group-text">
-                        <input class="input-group-text form-check-input mt-0" type="checkbox" value=""
-                            id="configCheckbox">
-                        <label class="form-check-label" for="configCheckbox"> Config </label>
-                    </div>
-                    <span id="configFileCount" class="input-group-text file-count"></span>
-                    <input type="number" class="form-control" id="configCount" min="0"
-                        placeholder="No. of files to delete">
-                    <span class="input-group-text deleteprogress" id="configProgress">0/0</span>
-                </div>
-                <div class="input-group mb-3 folder-input">
-                    <div class="input-group-text">
-                        <input class="input-group-text form-check-input mt-0" type="checkbox" value=""
-                            id="keylogerrorCheckbox">
-                        <label class="form-check-label" for="keylogerrorCheckbox"> Keylogerror </label>
-                    </div>
-                    <span id="keylogerrorFileCount" class="input-group-text file-count"></span>
-                    <input type="number" class="form-control" id="keylogerrorCount" min="0"
-                        placeholder="No. of files to delete">
-                    <span id="keylogerrorProgress" class="input-group-text deleteprogress">0/0</span>
-                </div>
-                <div class="input-group mb-3 folder-input">
-                    <div class="input-group-text">
-                        <input class="input-group-text form-check-input mt-0" type="checkbox" value=""
-                            id="logsCheckbox">
-                        <label class="form-check-label" for="logsCheckbox"> Logs </label>
-                    </div>
-                    <span id="logsFileCount" class="input-group-text file-count"></span>
-                    <input type="number" class="form-control" id="logsCount" min="0"
-                        placeholder="No. of files to delete">
-                    <span id="logsProgress" class="input-group-text deleteprogress">0/0</span>
-                </div>
-                <div class="input-group mb-3 folder-input">
-                    <div class="input-group-text">
-                        <input class="input-group-text form-check-input mt-0" type="checkbox" value=""
-                            id="screenshotsCheckbox">
-                        <label class="form-check-label" for="screenshotsCheckbox"> Screenshots </label>
-                    </div>
-                    <span id="screenshotsFileCount" class="input-group-text file-count"></span>
-                    <input type="number" class="form-control" id="screenshotsCount" min="0"
-                        placeholder="No. of files to delete">
-                    <span id="screenshotsProgress" class="input-group-text deleteprogress">0/0</span>
-                </div>
-            </div>
-            <div class="deletebutton">
-                <button type="button" class="btn btn-outline-danger" onclick="deleteFiles()">Delete Files</button>
-            </div>
-            <div id="result"></div>
-            <div id="terminal-log"></div> -->
-
             <!-- delete with advance and tab based -->
             <ul class="nav nav-tabs justify-content-center" id="myTab" role="tablist">
                 <li class="nav-item" role="presentation">
@@ -195,7 +134,8 @@
                     <div class="form-check mt-3">
                         <div class="input-group mb-3 folder-input">
                             <div class="input-group-text">
-                                <input class="input-group-text form-check-input mt-0" type="checkbox" id="cacheCheckbox">
+                                <input class="input-group-text form-check-input mt-0" type="checkbox"
+                                    id="cacheCheckbox">
                                 <label class="form-check-label" for="cacheCheckbox"> Cache </label>
                             </div>
                             <span id="cacheFileCount" class="input-group-text file-count"></span>
@@ -205,7 +145,8 @@
                         </div>
                         <div class="input-group mb-3 folder-input">
                             <div class="input-group-text">
-                                <input class="input-group-text form-check-input mt-0" type="checkbox" id="configCheckbox">
+                                <input class="input-group-text form-check-input mt-0" type="checkbox"
+                                    id="configCheckbox">
                                 <label class="form-check-label" for="configCheckbox"> Config </label>
                             </div>
                             <span id="configFileCount" class="input-group-text file-count"></span>
@@ -215,7 +156,8 @@
                         </div>
                         <div class="input-group mb-3 folder-input">
                             <div class="input-group-text">
-                                <input class="input-group-text form-check-input mt-0" type="checkbox" id="keylogerrorCheckbox">
+                                <input class="input-group-text form-check-input mt-0" type="checkbox"
+                                    id="keylogerrorCheckbox">
                                 <label class="form-check-label" for="keylogerrorCheckbox"> Keylogerror </label>
                             </div>
                             <span id="keylogerrorFileCount" class="input-group-text file-count"></span>
@@ -235,7 +177,8 @@
                         </div>
                         <div class="input-group mb-3 folder-input">
                             <div class="input-group-text">
-                                <input class="input-group-text form-check-input mt-0" type="checkbox" id="screenshotsCheckbox">
+                                <input class="input-group-text form-check-input mt-0" type="checkbox"
+                                    id="screenshotsCheckbox">
                                 <label class="form-check-label" for="screenshotsCheckbox"> Screenshots </label>
                             </div>
                             <span id="screenshotsFileCount" class="input-group-text file-count"></span>
@@ -925,6 +868,51 @@
             <!-- Terminal-like log -->
             <div id="downloadTerminalLog"
                 style="margin-top: 20px; border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; background-color: #323232; color: white; font-family: monospace; border-radius: 8px;">
+            </div>
+        </div>
+        <!-- commit history  -->
+        <div class="commitdata" id="navcommithistory">
+            <div class="alert alert-primary alert-dismissible fade show refreshdata" role="alert">
+                <strong>GitHub Commit History</strong>
+                <button type="button" class="btn refresh-btn" id="reload-button"><i
+                        class="bi bi-arrow-clockwise"></i></button>
+            </div>
+            <!-- <div id="commit-grid" class="commitContainer row">Fetching commit history...</div> -->
+            <!-- <div class="col-sm-6 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title text-center">Dashboard</h5>
+                        <p class="card-text">sdf_dskjfalksjijskdfalejaksfj</p>
+                        <div class="tokendetail">
+                            <strong>Limit: </strong><br>
+                            <strong>Remaining: </strong><br>
+                            <strong>Reset Time: </strong><br>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+            <div id="notification">Recent data updated</div>
+            <div class="commitContainer">
+                <div id="controls">
+                    <div class="input-group mb-3">
+                        <div class="input-group-text">
+                            <input class="input-group-text form-check-input mt-0" type="checkbox" id="auto-reload">
+                            <label class="form-check-label" for="auto-reload"> Auto Reload (every 1 minute) </label>
+                        </div>
+                        <input type="number" class="input-group-text" id="commit-count" value="20" min="1" max="100"
+                            placeholder="Commit Count" />
+                        <input type="search" class="input-group-text form-control" id="search-input" placeholder="Search commits..." />
+                    </div>
+                </div>
+                <ul id="commit-list"></ul>
+                <div id="pagination">
+                    <button type="button" class="btn btn-primary" id="prev-page">Previous</button>
+                    <span id="page-info">Page 1</span>
+                    <button type="button" class="btn btn-primary" id="next-page">Next</button>
+                </div>
+                <div id="stats"></div>
+                <div id="loading" class="loading" style="display: none;">Fetching commit history...</div>
+                <div id="error" class="error" style="display: none;"></div>
             </div>
         </div>
 

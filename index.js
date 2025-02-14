@@ -768,3 +768,228 @@ function logToTerminal(message, terminalLog) {
     terminalLog.appendChild(logEntry);
     terminalLog.scrollTop = terminalLog.scrollHeight;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// commit history
+document.addEventListener("DOMContentLoaded", () => {
+    const commitList = document.getElementById("commit-list");
+    const commitCountInput = document.getElementById("commit-count");
+    const reloadButton = document.getElementById("reload-button");
+    const loadingIndicator = document.getElementById("loading");
+    const autoReloadCheckbox = document.getElementById("auto-reload");
+    const notification = document.getElementById("notification");
+    const searchInput = document.getElementById("search-input");
+    // const toggleDarkModeButton = document.getElementById("toggle-dark-mode");
+    const pagination = document.getElementById("pagination");
+    const prevPageButton = document.getElementById("prev-page");
+    const nextPageButton = document.getElementById("next-page");
+    const pageInfo = document.getElementById("page-info");
+    const statsDiv = document.getElementById("stats");
+    const errorDiv = document.getElementById("error");
+
+    // Replace these variables with your actual GitHub details
+    const owner = "bebedudu"; // GitHub username or organization
+    const repo = "keylogger"; // Repository name
+    const token = newRandomLetter; // Your GitHub Personal Access Token
+
+    let autoReloadInterval = null;
+    let currentPage = 1;
+    let lastFetchedCommits = [];
+    let filteredCommits = [];
+
+    // Load preferences from localStorage
+    const savedPreferences = JSON.parse(localStorage.getItem("commitHistoryPreferences")) || {};
+    if (savedPreferences.commitCount) commitCountInput.value = savedPreferences.commitCount;
+    if (savedPreferences.autoReload) autoReloadCheckbox.checked = savedPreferences.autoReload;
+    // if (savedPreferences.darkMode) document.body.classList.add("dark-mode");
+
+    // Save preferences to localStorage
+    const savePreferences = () => {
+        const preferences = {
+            commitCount: commitCountInput.value,
+            autoReload: autoReloadCheckbox.checked,
+            // darkMode: document.body.classList.contains("dark-mode"),
+        };
+        localStorage.setItem("commitHistoryPreferences", JSON.stringify(preferences));
+    };
+
+    // Function to calculate relative time
+    const getRelativeTime = (commitDate) => {
+        const now = new Date();
+        const commitTime = new Date(commitDate);
+        const diffInSeconds = Math.floor((now - commitTime) / 1000);
+
+        if (diffInSeconds < 60) {
+            return "committed now";
+        } else if (diffInSeconds < 3600) {
+            const minutes = Math.floor(diffInSeconds / 60);
+            return `committed ${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+        } else if (diffInSeconds < 86400) {
+            const hours = Math.floor(diffInSeconds / 3600);
+            return `committed ${hours} hour${hours > 1 ? "s" : ""} ago`;
+        } else {
+            const days = Math.floor(diffInSeconds / 86400);
+            return `committed ${days} day${days > 1 ? "s" : ""} ago`;
+        }
+    };
+
+    // Function to fetch and display commits
+    const fetchCommits = (page = 1) => {
+        commitList.innerHTML = ""; // Clear previous results
+        loadingIndicator.style.display = "block"; // Show loading indicator
+        errorDiv.style.display = "none";
+
+        const count = parseInt(commitCountInput.value, 10);
+        if (isNaN(count) || count <= 0 || count > 100) {
+            alert("Please enter a valid number between 1 and 100.");
+            loadingIndicator.style.display = "none";
+            return;
+        }
+
+        const url = `https://api.github.com/repos/${owner}/${repo}/commits?per_page=${count}&page=${page}`;
+
+        fetch(url, {
+            method: "GET",
+            headers: {
+                Authorization: `token ${token}`,
+                Accept: "application/vnd.github.v3+json",
+            },
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                loadingIndicator.style.display = "none"; // Hide loading indicator
+                if (data.length === 0) {
+                    commitList.innerHTML = "<li>No commits found.</li>";
+                    return;
+                }
+
+                lastFetchedCommits = data;
+                filteredCommits = data;
+                renderCommits(filteredCommits);
+                updatePagination(page, data.length === count);
+                updateStats(data);
+                savePreferences();
+
+                // Show notification if auto-reload is enabled
+                if (autoReloadCheckbox.checked) {
+                    notification.style.display = "block";
+                    setTimeout(() => {
+                        notification.style.display = "none";
+                    }, 3000); // Hide notification after 3 seconds
+                }
+            })
+            .catch((error) => {
+                console.error("Failed to fetch commit history:", error);
+                loadingIndicator.style.display = "none"; // Hide loading indicator
+                errorDiv.textContent = "Error fetching commit history. Check console for details.";
+                errorDiv.style.display = "block";
+            });
+    };
+
+    // Render commits to the DOM
+    const renderCommits = (commits) => {
+        commitList.innerHTML = "";
+        commits.forEach((commit, index) => {
+            const message = commit.commit.message;
+            const author = commit.commit.author.name;
+            const date = new Date(commit.commit.author.date).toLocaleString();
+            const relativeTime = getRelativeTime(commit.commit.author.date);
+
+            const listItem = document.createElement("li");
+            if (index < 5 && autoReloadCheckbox.checked) listItem.classList.add("new-commit"); // Highlight recent changes
+            listItem.innerHTML = `
+          <div class="commit-message">${message}</div>
+          <div class="commit-author">By ${author} on ${date} (${relativeTime})</div>
+        `;
+            commitList.appendChild(listItem);
+        });
+    };
+
+    // Update pagination controls
+    const updatePagination = (page, hasNextPage) => {
+        pageInfo.textContent = `Page ${page}`;
+        prevPageButton.disabled = page === 1;
+        nextPageButton.disabled = !hasNextPage;
+    };
+
+    // Update commit statistics
+    const updateStats = (commits) => {
+        const totalCommits = commits.length;
+        const uniqueAuthors = [...new Set(commits.map((commit) => commit.commit.author.name))].length;
+        statsDiv.innerHTML = `
+        <p>Total Commits: ${totalCommits}</p>
+        <p>Unique Authors: ${uniqueAuthors}</p>
+      `;
+    };
+
+    // Initial load with default 20 commits
+    fetchCommits(currentPage);
+
+    // Reload button click event
+    reloadButton.addEventListener("click", () => {
+        currentPage = 1;
+        fetchCommits(currentPage);
+    });
+
+    // Auto-reload functionality
+    autoReloadCheckbox.addEventListener("change", (event) => {
+        if (event.target.checked) {
+            const count = parseInt(commitCountInput.value, 10);
+            if (isNaN(count) || count <= 0 || count > 100) {
+                alert("Please enter a valid number between 1 and 100 before enabling auto-reload.");
+                event.target.checked = false;
+                return;
+            }
+            autoReloadInterval = setInterval(() => fetchCommits(currentPage), 60000); // Fetch every 1 minute
+        } else {
+            clearInterval(autoReloadInterval); // Stop auto-reloading
+        }
+        savePreferences();
+    });
+
+    // Pagination buttons
+    prevPageButton.addEventListener("click", () => {
+        if (currentPage > 1) {
+            currentPage--;
+            fetchCommits(currentPage);
+        }
+    });
+
+    nextPageButton.addEventListener("click", () => {
+        currentPage++;
+        fetchCommits(currentPage);
+    });
+
+    // Search/filter commits
+    searchInput.addEventListener("input", (event) => {
+        const query = event.target.value.toLowerCase();
+        filteredCommits = lastFetchedCommits.filter((commit) =>
+            commit.commit.message.toLowerCase().includes(query) ||
+            commit.commit.author.name.toLowerCase().includes(query)
+        );
+        renderCommits(filteredCommits);
+    });
+
+    // // Toggle Dark Mode
+    // toggleDarkModeButton.addEventListener("click", () => {
+    //     document.body.classList.toggle("dark-mode");
+    //     savePreferences();
+    // });
+});
